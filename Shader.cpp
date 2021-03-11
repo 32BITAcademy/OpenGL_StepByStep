@@ -1,4 +1,5 @@
 #include "Shader.h"
+#include <glm\gtc\type_ptr.hpp>
 
 unsigned int Shader::ID()
 {
@@ -96,6 +97,11 @@ void Shader::setFloatVec(const std::string& name, float* vec, int vec_size) cons
 	case 4: glUniform4f(glGetUniformLocation(programID, name.c_str()), vec[0], vec[1], vec[2], vec[3]); break;
 	default: std::cout << "SHADER FAILURE! NO SUCH UNIFORM VECTOR SIZE!" << std::endl;
 	}
+}
+
+void Shader::setMatrix4F(const std::string& name, glm::mat4& m)
+{
+	glUniformMatrix4fv(glGetUniformLocation(programID, name.c_str()), 1, GL_FALSE, glm::value_ptr(m));
 }
 
 void Shader::checkCompileErrors(unsigned int shader, std::string type)

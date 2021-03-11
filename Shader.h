@@ -1,6 +1,7 @@
 #pragma once
 
 #include <glad/glad.h>
+#include <glm/glm.hpp>
 
 #include <string>
 #include <fstream>
@@ -17,6 +18,7 @@ public:
     void setInt(const std::string& name, int value) const;
     void setFloat(const std::string& name, float value) const;
     void setFloatVec(const std::string& name, float* vec, int vec_size) const;
+    void setMatrix4F(const std::string& name, glm::mat4& m);
     unsigned int ID();
 
 private:
