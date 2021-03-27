@@ -45,7 +45,9 @@ void Camera::Move(int32_t dirs, float deltaTime)
     direction.z = (dirs & CAM_FORWARD) / CAM_FORWARD - (dirs & CAM_BACKWARD) / CAM_BACKWARD;
     direction.x = (dirs & CAM_RIGHT) / CAM_RIGHT - (dirs & CAM_LEFT) / CAM_LEFT;
     direction.y = (dirs & CAM_UP) / CAM_UP - (dirs & CAM_DOWN) / CAM_DOWN;
-    glm::normalize(direction);
+
+    if (direction != glm::vec3(0.0f))
+        direction = glm::normalize(direction); // now the vector is normalized
         
     Position += Front * velocity * direction.z;
     Position += Right * velocity * direction.x;
