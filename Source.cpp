@@ -142,7 +142,7 @@ int main()
 	glfwSetInputMode(win, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	UpdatePolygoneMode();
 	glEnable(GL_CULL_FACE);
-	glFrontFace(GL_CW);
+	glFrontFace(GL_CCW);
 
 #pragma endregion
 
@@ -150,32 +150,51 @@ int main()
 	byte* data = stbi_load("images\\box.png", &box_width, &box_height, &channels, 0);
 
 
-	const int verts = 8;
+	const int verts = 36;
 
-	float cube[verts*(3+3+2)] = {
-/*1*/	-1.0f,	1.0f,	-1.0f,		1.0f, 0.0f, 0.0f,		0.f, 1.f,
-/*2*/	1.0f,	1.0f,	-1.0f,		0.5f, 0.5f, 0.0f,		1.f, 1.f, 
-/*3*/	1.0f,	1.0f,	1.0f,		0.0f, 1.0f, 0.0f,		1.f, 0.f,
-/*4*/	-1.0f,	1.0f,	1.0f,		0.0f, 0.5f, 0.5f,		0.f, 0.f,
-/*5*/	-1.0f,	-1.0f,	-1.0f,		0.0f, 0.0f, 1.0f,		1.f, 0.f,
-/*6*/	1.0f,	-1.0f,	-1.0f,		0.5f, 0.0f, 0.5f,		0.f, 0.f,
-/*7*/	1.0f,	-1.0f,	1.0f,		0.5f, 0.5f, 0.5f,		0.f, 1.f,
-/*8*/	-1.0f,	-1.0f,	1.0f,		1.0f, 1.0f, 1.0f,		1.f, 1.f
-	};
+	float cube[] = {
+		//position			normal					texture				color			
+	-1.0f,-1.0f,-1.0f,	-1.0f,  0.0f,  0.0f,	0.0f, 0.0f,		0.0f, 1.0f, 0.0f,
+	-1.0f,-1.0f, 1.0f,	-1.0f,  0.0f,  0.0f,	1.0f, 0.0f,		0.0f, 1.0f, 0.0f,
+	-1.0f, 1.0f, 1.0f,	-1.0f,  0.0f,  0.0f,	1.0f, 1.0f,		0.0f, 1.0f, 0.0f,
+	-1.0f,-1.0f,-1.0f,	-1.0f,  0.0f,  0.0f,	0.0f, 0.0f,		0.0f, 1.0f, 0.0f,
+	-1.0f, 1.0f, 1.0f,	-1.0f,  0.0f,  0.0f,	1.0f, 1.0f,		0.0f, 1.0f, 0.0f,
+	-1.0f, 1.0f,-1.0f,	-1.0f,  0.0f,  0.0f,	0.0f, 1.0f,		0.0f, 1.0f, 0.0f,
 
-	unsigned int indices[] = {
-		0,1,3,
-		1,2,3,
-		0,4,1,
-		1,4,5,
-		0,3,7,
-		0,7,4,
-		1,6,2,
-		1,5,6,
-		2,7,3,
-		2,6,7,
-		4,7,5,
-		5,7,6
+	1.0f, 1.0f,-1.0f,	0.0f,  0.0f, -1.0f, 	0.0f, 1.0f,		1.0f, 0.0f, 0.0f,
+	-1.0f,-1.0f,-1.0f,	0.0f,  0.0f, -1.0f, 	1.0f, 0.0f,		1.0f, 0.0f, 0.0f,
+	-1.0f, 1.0f,-1.0f,	0.0f,  0.0f, -1.0f, 	1.0f, 1.0f,		1.0f, 0.0f, 0.0f,
+	1.0f, 1.0f,-1.0f,	0.0f,  0.0f, -1.0f,		0.0f, 1.0f,		1.0f, 0.0f, 0.0f,
+	1.0f,-1.0f,-1.0f,	0.0f,  0.0f, -1.0f,		0.0f, 0.0f,		1.0f, 0.0f, 0.0f,
+	-1.0f,-1.0f,-1.0f,	0.0f,  0.0f, -1.0f,		1.0f, 0.0f,		1.0f, 0.0f, 0.0f,
+
+	1.0f,-1.0f, 1.0f,	0.0f, -1.0f,  0.0f,		0.0f, 0.0f,		0.0f, 0.0f, 1.0f,
+	-1.0f,-1.0f,-1.0f,	0.0f, -1.0f,  0.0f,		1.0f, 1.0f,		0.0f, 0.0f, 1.0f,
+	1.0f,-1.0f,-1.0f,	0.0f, -1.0f,  0.0f,		0.0f, 1.0f,		0.0f, 0.0f, 1.0f,
+	1.0f,-1.0f, 1.0f,	0.0f, -1.0f,  0.0f,		0.0f, 0.0f,		0.0f, 0.0f, 1.0f,
+	-1.0f,-1.0f, 1.0f,	0.0f, -1.0f,  0.0f,		1.0f, 0.0f,		0.0f, 0.0f, 1.0f,
+	-1.0f,-1.0f,-1.0f,	0.0f, -1.0f,  0.0f,		1.0f, 1.0f,		0.0f, 0.0f, 1.0f,
+
+	-1.0f, 1.0f, 1.0f,	0.0f,  0.0f, 1.0f,		0.0f, 1.0f,		0.0f, 0.0f, 1.0f,
+	-1.0f,-1.0f, 1.0f,	0.0f,  0.0f, 1.0f,		0.0f, 0.0f,		0.0f, 0.0f, 1.0f,
+	1.0f,-1.0f, 1.0f,	0.0f,  0.0f, 1.0f,		1.0f, 0.0f,		0.0f, 0.0f, 1.0f,
+	1.0f, 1.0f, 1.0f,	0.0f,  0.0f, 1.0f,		1.0f, 1.0f,		0.0f, 0.0f, 1.0f,
+	-1.0f, 1.0f, 1.0f,	0.0f,  0.0f, 1.0f,		0.0f, 1.0f,		0.0f, 0.0f, 1.0f,
+	1.0f,-1.0f, 1.0f,	0.0f,  0.0f, 1.0f,		1.0f, 0.0f,		0.0f, 0.0f, 1.0f,
+
+	1.0f, 1.0f, 1.0f,	1.0f,  0.0f,  0.0f,		0.0f, 1.0f,		1.0f, 0.0f, 0.0f,
+	1.0f,-1.0f,-1.0f,	1.0f,  0.0f,  0.0f,		1.0f, 0.0f,		1.0f, 0.0f, 0.0f,
+	1.0f, 1.0f,-1.0f,	1.0f,  0.0f,  0.0f,		1.0f, 1.0f,		1.0f, 0.0f, 0.0f,
+	1.0f,-1.0f,-1.0f,	1.0f,  0.0f,  0.0f,		1.0f, 0.0f,		1.0f, 0.0f, 0.0f,
+	1.0f, 1.0f, 1.0f,	1.0f,  0.0f,  0.0f,		0.0f, 1.0f,		1.0f, 0.0f, 0.0f,
+	1.0f,-1.0f, 1.0f,	1.0f,  0.0f,  0.0f,		0.0f, 0.0f,		1.0f, 0.0f, 0.0f,
+
+	1.0f, 1.0f, 1.0f,	0.0f,  1.0f,  0.0f,		1.0f, 0.0f,		0.0f, 1.0f, 0.0f,
+	1.0f, 1.0f,-1.0f,	0.0f,  1.0f,  0.0f,		1.0f, 1.0f,		0.0f, 1.0f, 0.0f,
+	-1.0f, 1.0f,-1.0f,	0.0f,  1.0f,  0.0f,		0.0f, 1.0f,		0.0f, 1.0f, 0.0f,
+	1.0f, 1.0f, 1.0f,	0.0f,  1.0f,  0.0f,		1.0f, 0.0f,		0.0f, 1.0f, 0.0f,
+	-1.0f, 1.0f,-1.0f,	0.0f,  1.0f,  0.0f,		0.0f, 1.0f,		0.0f, 1.0f, 0.0f,
+	-1.0f, 1.0f, 1.0f,	0.0f,  1.0f,  0.0f,		0.0f, 0.0f,		0.0f, 1.0f, 0.0f
 	};
 
 	ModelTransform polygonTrans1 = { glm::vec3(0.f, 0.f, 0.f),	// position
@@ -189,6 +208,10 @@ int main()
 	ModelTransform polygonTrans3 = { glm::vec3(0.f, 0.f, 0.f),	// position
 									glm::vec3(0.f, 0.f, 0.f),	// rotation
 									glm::vec3(1.f, 1.f, 1.f) };	// scale
+
+	ModelTransform lightTrans = {   glm::vec3(0.f, 0.f, 0.f),	// position
+									glm::vec3(0.f, 0.f, 0.f),	// rotation
+									glm::vec3(0.1f, 0.1f, 0.1f) };	// scale
 
 #pragma region BUFFERS INITIALIZATION
 	unsigned int box_texture;
@@ -208,34 +231,41 @@ int main()
 	//glGenerateMipmap(GL_TEXTURE_2D);
 	stbi_image_free(data);
 
-	unsigned int VBO_polygon, VAO_polygon, EBO_polygon;
+	unsigned int VBO_polygon, VAO_polygon;
 	glGenBuffers(1, &VBO_polygon);
-	glGenBuffers(1, &EBO_polygon);
 	glGenVertexArrays(1, &VAO_polygon);
 
 	glBindVertexArray(VAO_polygon);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO_polygon);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * verts * 8, cube, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(cube), cube, GL_STATIC_DRAW);
 
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO_polygon);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * 36, indices, GL_STATIC_DRAW);
-
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*) 0);
+	// position
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*) 0);
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+
+	// normal
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(3 * sizeof(float)));
 	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+
+	// texture coords
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(6 * sizeof(float)));
 	glEnableVertexAttribArray(2);
+
+	// color
+	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(8 * sizeof(float)));
+	glEnableVertexAttribArray(3);
 
 #pragma endregion
 
 	Shader* polygon_shader = new Shader("shaders\\basic.vert", "shaders\\basic.frag");
+	Shader* light_shader = new Shader("shaders\\light.vert", "shaders\\light.frag");
 
 	double oldTime = glfwGetTime(), newTime, deltaTime;
 
-	double a, b;
-	glfwGetCursorPos(win, &a, &b);
-	std::cout << a << " " << b << "\n";
+	glm::vec3 lightPos = glm::vec3(0.0f, 0.0f, 0.0f);
+	glm::vec3 lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
+	glm::vec3 ambientColor = glm::vec3(1.0f, 1.0f, 1.0f);
+
 
 	while (!glfwWindowShouldClose(win))
 	{
@@ -262,17 +292,21 @@ int main()
 		//polygonTrans3.rotation.x = glfwGetTime() * 90.0;
 		//polygonTrans3.rotation.y = glfwGetTime() * 60.0;
 
+		lightPos.x = 2.0f * cos(glfwGetTime() * 1.2f);
+		lightPos.y = 0.0f;
+		lightPos.z = 2.0f * sin(glfwGetTime() * 1.2f);
+		lightTrans.position = lightPos;
+
 		glClearColor(background.r, background.g, background.b, background.a);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		polygon_shader->use();
+		
 
 		//camera.Rotate(0.5f, 0);
 
 		glm::mat4 p = camera.GetProjectionMatrix();
 		glm::mat4 v = camera.GetViewMatrix();
 		glm::mat4 pv = p * v;
-		glm::mat4 pvm;
 
 		// 1
 		glm::mat4 model = glm::mat4(1.0f);
@@ -283,14 +317,20 @@ int main()
 		model = glm::rotate(model, glm::radians(polygonTrans1.rotation.z), glm::vec3(0.f, 0.f, 1.f));
 		model = glm::scale(model, polygonTrans1.scale);
 
-		pvm = pv * model;
-		polygon_shader->setMatrix4F("pvm", pvm);
+
+		polygon_shader->use();
+		polygon_shader->setMatrix4F("pv", pv);
+		polygon_shader->setMatrix4F("model", model);
 		polygon_shader->setBool("wireframeMode", wireframeMode);
+		polygon_shader->setVec3("viewPos", camera.Position);
+		polygon_shader->setVec3("lightPos", lightPos);
+		polygon_shader->setVec3("lightColor", lightColor);
+		polygon_shader->setVec3("ambientColor", ambientColor);
 
 
 		glBindTexture(GL_TEXTURE_2D, box_texture);
 		glBindVertexArray(VAO_polygon);
-		glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
 
 
 		// 2
@@ -301,12 +341,17 @@ int main()
 		model = glm::rotate(model, glm::radians(polygonTrans2.rotation.z), glm::vec3(0.f, 0.f, 1.f));
 		model = glm::scale(model, polygonTrans2.scale);
 
-		pvm = pv * model;
-		polygon_shader->setMatrix4F("pvm", pvm);
+		polygon_shader->use();
+		polygon_shader->setMatrix4F("pv", pv);
+		polygon_shader->setMatrix4F("model", model);
 		polygon_shader->setBool("wireframeMode", wireframeMode);
+		polygon_shader->setVec3("viewPos", camera.Position);
+		polygon_shader->setVec3("lightPos", lightPos);
+		polygon_shader->setVec3("lightColor", lightColor);
+		polygon_shader->setVec3("ambientColor", ambientColor);
 
 		//glBindVertexArray(VAO_polygon);
-		glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
 
 		// 3
 		model = glm::mat4(1.0f);
@@ -316,12 +361,32 @@ int main()
 		model = glm::rotate(model, glm::radians(polygonTrans3.rotation.z), glm::vec3(0.f, 0.f, 1.f));
 		model = glm::scale(model, polygonTrans3.scale);
 
-		pvm = pv * model;
-		polygon_shader->setMatrix4F("pvm", pvm);
-
-		//glBindVertexArray(VAO_polygon);
-		glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+		polygon_shader->use();
+		polygon_shader->setMatrix4F("pv", pv);
+		polygon_shader->setMatrix4F("model", model);
 		polygon_shader->setBool("wireframeMode", wireframeMode);
+		polygon_shader->setVec3("viewPos", camera.Position);
+		polygon_shader->setVec3("lightPos", lightPos);
+		polygon_shader->setVec3("lightColor", lightColor);
+		polygon_shader->setVec3("ambientColor", ambientColor);
+
+		glBindVertexArray(VAO_polygon);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+
+
+
+		// LIGHT
+		model = glm::mat4(1.0f);
+		model = glm::translate(model, lightTrans.position);
+		model = glm::scale(model, lightTrans.scale);
+
+		light_shader->use();
+		light_shader->setMatrix4F("pv", pv);
+		light_shader->setMatrix4F("model", model);
+		light_shader->setVec3("lightColor", lightColor);
+
+		glBindVertexArray(VAO_polygon);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
 
 
 		glfwSwapBuffers(win);
