@@ -12,6 +12,9 @@ struct Light {
     vec3 ambient;
     vec3 diffuse;
     vec3 specular;
+    float constant;
+    float linear;
+    float quadratic;
 };
 
 in vec3 vertColor;
@@ -30,26 +33,23 @@ uniform Light light;
 
 void main()
 {
-    vec3 ambient = light.ambient * material.ambient;
+    float dist = distance(light.position, FragPos);
+    float attenuation = 1.0 / (light.constant + light.linear*dist + light.quadratic * dist * dist);
+
+    vec3 ambient = light.ambient * material.ambient * attenuation;
 
     // diffuse
     vec3 norm = normalize(vertNormal);
     vec3 lightDir = normalize(FragPos - light.position);
     float diff_koef = max(dot(norm, -lightDir), 0.0);
-    vec3 diffuse = light.diffuse * (diff_koef * material.diffuse);
+    vec3 diffuse = light.diffuse * (diff_koef * material.diffuse) * attenuation;
 
     // specular
-    vec3 lightpos = light.position;
-    float spec_koef = 0;
-    for(float i = -0.2; i<=0.2; i+=0.05)
-    {
-        lightpos.y = light.position.y + i;
-        vec3 slightDir = normalize(FragPos - lightpos);
-        vec3 reflectDir = reflect(-slightDir, norm);
-        vec3 viewDir = normalize(FragPos-viewPos);
-        spec_koef += pow(max(dot(viewDir, reflectDir), 0.0f), material.shininess*20.f);
-    }
-    vec3 specular = light.specular * (spec_koef * material.specular);
+    vec3 reflectDir = reflect(-lightDir, norm);
+    vec3 viewDir = normalize(FragPos-viewPos);
+    float spec_koef = pow(max(dot(viewDir, reflectDir), 0.0f), material.shininess);
+    
+    vec3 specular = light.specular * (spec_koef * material.specular) * attenuation;
 
     if (wireframeMode)
         outColor = vec4(vertColor, 1.0f);

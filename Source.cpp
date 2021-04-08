@@ -39,13 +39,26 @@ struct Material
 	float shininess;
 };
 
-struct Light
+struct DirecationalLight
+{
+	glm::vec3 direction;
+
+	glm::vec3 ambient;
+	glm::vec3 diffuse;
+	glm::vec3 specular;
+};
+
+struct PointLight
 {
 	glm::vec3 position;
 
 	glm::vec3 ambient;
 	glm::vec3 diffuse;
 	glm::vec3 specular;
+
+	float constant;
+	float linear;
+	float quadratic;
 };
 
 Camera camera(glm::vec3(0.f, 0.f, -2.f));
@@ -214,37 +227,49 @@ int main()
 	-1.0f, 1.0f, 1.0f,	0.0f,  1.0f,  0.0f,		0.0f, 0.0f,		0.0f, 1.0f, 0.0f
 	};
 
-	ModelTransform cubeTrans1 = { glm::vec3(0.f, 0.f, 0.f),	// position
-									glm::vec3(0.f, 0.f, 0.f),	// rotation
-									glm::vec3(1.f, 1.f, 1.f) };	// scale
+	Material cubeMaterials[3] = {
+		{
+			glm::vec3(0.25, 0.20725, 0.20725),
+			glm::vec3(1, 0.829, 0.829),
+			glm::vec3(0.296648,	0.296648, 0.296648),
+			12.f
+		}, // pearl
+		{
+			glm::vec3(0.25, 0.25, 0.25),
+			glm::vec3(0.4, 0.4, 0.4),
+			glm::vec3(0.774597,	0.774597, 0.774597),
+			77.f
+		}, // chrome
+		{
+			glm::vec3(0.1745, 0.01175, 0.01175),
+			glm::vec3(0.61424, 0.04136, 0.04136),
+			glm::vec3(0.727811, 0.626959, 0.626959),
+			77.f
+		} // ruby
+	};
 
-	ModelTransform cubeTrans2 = { glm::vec3(0.f, 0.f, 0.f),	// position
-									glm::vec3(0.f, 0.f, 0.f),	// rotation
-									glm::vec3(1.f, 1.f, 1.f) };	// scale
+	const int cube_count = 100;
 
-	ModelTransform cubeTrans3 = { glm::vec3(0.f, 0.f, 0.f),	// position
-									glm::vec3(0.f, 0.f, 0.f),	// rotation
-									glm::vec3(1.f, 1.f, 1.f) };	// scale
+	ModelTransform cubeTrans[cube_count];
+	int cubeMat[cube_count];
+	for (int i = 0; i < cube_count; i++)
+	{
+		float scale = (rand() % 6 + 1) / 20.0f;
+		cubeTrans[i] = {
+			glm::vec3((rand() % 201 - 100) / 50.0f, (rand() % 201 - 100) / 50.0f, (rand() % 201 - 100) / 50.0f),
+			glm::vec3(rand() / 100.0f, rand() / 100.0f, rand() / 100.0f),
+			glm::vec3(scale, scale, scale)
+		};
+		cubeMat[i] = rand() % 3;
+	}
 
-	ModelTransform lightTrans = {   glm::vec3(0.f, 0.f, 0.f),	// position
-									glm::vec3(0.f, 0.f, 0.f),	// rotation
-									glm::vec3(0.1f, 0.1f, 0.1f) };	// scale
 
-	Material cubeMat1 = {	glm::vec3(0.25, 0.20725, 0.20725),
-							glm::vec3(1, 0.829, 0.829),
-							glm::vec3(0.296648,	0.296648, 0.296648),
-							12.f }; // pearl
+	ModelTransform lightTrans = { 
+		glm::vec3(0.f, 0.f, 0.f),	// position
+		glm::vec3(0.f, 0.f, 0.f),	// rotation
+		glm::vec3(0.1f, 0.1f, 0.1f) };	// scale
 
-	Material cubeMat2 = {	glm::vec3(0.25, 0.25, 0.25),
-							glm::vec3(0.4, 0.4, 0.4),
-							glm::vec3(0.774597,	0.774597, 0.774597),
-							77.f }; // chrome
 	
-	Material cubeMat3 = {	glm::vec3(0.1745, 0.01175, 0.01175),
-							glm::vec3(0.61424, 0.04136, 0.04136),
-							glm::vec3(0.727811, 0.626959, 0.626959),
-							77.f }; // ruby
-
 #pragma region BUFFERS INITIALIZATION
 	unsigned int box_texture;
 	glGenTextures(1, &box_texture);
@@ -294,10 +319,11 @@ int main()
 
 	double oldTime = glfwGetTime(), newTime, deltaTime;
 
-	Light light1 = {	glm::vec3(0.0f, 0.0f, 0.0f),
-						glm::vec3(0.2f, 0.2f, 0.2f),
-						glm::vec3(0.5f, 0.5f, 0.5f),
-						glm::vec3(1.0f, 1.0f, 1.0f) };
+	PointLight light1 = {	glm::vec3(0.0f, 0.0f, 0.0f),
+						glm::vec3(0.4f, 0.4f, 0.4f),
+						glm::vec3(1.0f, 1.0f, 1.0f),
+						glm::vec3(3.0f, 3.0f, 3.0f),
+						0.9f, 0.1f, 0.09f };
 
 	while (!glfwWindowShouldClose(win))
 	{
@@ -307,117 +333,54 @@ int main()
 
 		processInput(win, deltaTime);
 
-		cubeTrans1.rotation.z = glfwGetTime() * 60.0;
-		//cubeTrans1.rotation.x = glfwGetTime() * 45.0;
-		cubeTrans1.position.x = 0.6f;
-		cubeTrans1.setScale(0.2f);
-		
-		
-		cubeTrans2.rotation.z = glfwGetTime() * 30.0;
-		//cubeTrans2.rotation.y = glfwGetTime() * 45.0;
-		cubeTrans2.position.x = -0.6f;
-		cubeTrans2.setScale(0.2f);
-
-		cubeTrans3.setScale(0.2f);
-		//cubeTrans3.rotation.x = glfwGetTime() * 90.0;
-		//cubeTrans3.rotation.y = glfwGetTime() * 60.0;
-
-		light1.position.x = 2.0f;// *cos(glfwGetTime() * 1.2f);
-		light1.position.y = 0.0f;
-		light1.position.z = 2.0f; // *sin(glfwGetTime() * 1.2f);
 		lightTrans.position = light1.position;
 
 		glClearColor(background.r, background.g, background.b, background.a);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		
-
-		//camera.Rotate(0.5f, 0);
-
 		glm::mat4 p = camera.GetProjectionMatrix();
 		glm::mat4 v = camera.GetViewMatrix();
 		glm::mat4 pv = p * v;
 
-		// 1
-		glm::mat4 model = glm::mat4(1.0f);
+		glm::mat4 model;
 
-		model = glm::translate(model, cubeTrans1.position);
-		model = glm::rotate(model, glm::radians(cubeTrans1.rotation.x), glm::vec3(1.f, 0.f, 0.f));
-		model = glm::rotate(model, glm::radians(cubeTrans1.rotation.y), glm::vec3(0.f, 1.f, 0.f));
-		model = glm::rotate(model, glm::radians(cubeTrans1.rotation.z), glm::vec3(0.f, 0.f, 1.f));
-		model = glm::scale(model, cubeTrans1.scale);
+		for (int i = 0; i < cube_count; i++)
+		{
+			model = glm::mat4(1.0f);
+
+			model = glm::translate(model, cubeTrans[i].position);
+			model = glm::rotate(model, glm::radians(cubeTrans[i].rotation.x), glm::vec3(1.f, 0.f, 0.f));
+			model = glm::rotate(model, glm::radians(cubeTrans[i].rotation.y), glm::vec3(0.f, 1.f, 0.f));
+			model = glm::rotate(model, glm::radians(cubeTrans[i].rotation.z), glm::vec3(0.f, 0.f, 1.f));
+			model = glm::scale(model, cubeTrans[i].scale);
+
+			polygon_shader->use();
+			polygon_shader->setMatrix4F("pv", pv);
+			polygon_shader->setMatrix4F("model", model);
+			polygon_shader->setBool("wireframeMode", wireframeMode);
+			polygon_shader->setVec3("viewPos", camera.Position);
+
+			polygon_shader->setVec3("light.position", light1.position);
+			polygon_shader->setVec3("light.ambient", light1.ambient);
+			polygon_shader->setVec3("light.diffuse", light1.diffuse);
+			polygon_shader->setVec3("light.specular", light1.specular);
+			polygon_shader->setFloat("light.constant", light1.constant);
+			polygon_shader->setFloat("light.linear", light1.linear);
+			polygon_shader->setFloat("light.quadratic", light1.quadratic);
+
+			polygon_shader->setVec3("material.ambient",		cubeMaterials[cubeMat[i]].ambient);
+			polygon_shader->setVec3("material.diffuse",		cubeMaterials[cubeMat[i]].diffuse);
+			polygon_shader->setVec3("material.specular",	cubeMaterials[cubeMat[i]].specular);
+			polygon_shader->setFloat("material.shininess",	cubeMaterials[cubeMat[i]].shininess);
 
 
-		polygon_shader->use();
-		polygon_shader->setMatrix4F("pv", pv);
-		polygon_shader->setMatrix4F("model", model);
-		polygon_shader->setBool("wireframeMode", wireframeMode);
-		polygon_shader->setVec3("viewPos", camera.Position);
-		polygon_shader->setVec3("light.position", light1.position);
-		polygon_shader->setVec3("light.ambient", light1.ambient);
-		polygon_shader->setVec3("light.diffuse", light1.diffuse);
-		polygon_shader->setVec3("light.specular", light1.specular);
-		polygon_shader->setVec3("material.ambient", cubeMat1.ambient);
-		polygon_shader->setVec3("material.diffuse", cubeMat1.diffuse);
-		polygon_shader->setVec3("material.specular", cubeMat1.specular);
-		polygon_shader->setFloat("material.shininess", cubeMat1.shininess);
+			glBindTexture(GL_TEXTURE_2D, box_texture);
+			glBindVertexArray(VAO_polygon);
+			glDrawArrays(GL_TRIANGLES, 0, 36);
+		}
 
-
-		glBindTexture(GL_TEXTURE_2D, box_texture);
-		glBindVertexArray(VAO_polygon);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-
-
-		// 2
-		model = glm::mat4(1.0f);
-		model = glm::translate(model, cubeTrans2.position);
-		model = glm::rotate(model, glm::radians(cubeTrans2.rotation.x), glm::vec3(1.f, 0.f, 0.f));
-		model = glm::rotate(model, glm::radians(cubeTrans2.rotation.y), glm::vec3(0.f, 1.f, 0.f));
-		model = glm::rotate(model, glm::radians(cubeTrans2.rotation.z), glm::vec3(0.f, 0.f, 1.f));
-		model = glm::scale(model, cubeTrans2.scale);
-
-		polygon_shader->use();
-		polygon_shader->setMatrix4F("pv", pv);
-		polygon_shader->setMatrix4F("model", model);
-		polygon_shader->setBool("wireframeMode", wireframeMode);
-		polygon_shader->setVec3("viewPos", camera.Position);
-		polygon_shader->setVec3("light.position", light1.position);
-		polygon_shader->setVec3("light.ambient", light1.ambient);
-		polygon_shader->setVec3("light.diffuse", light1.diffuse);
-		polygon_shader->setVec3("light.specular", light1.specular);
-		polygon_shader->setVec3("material.ambient", cubeMat2.ambient);
-		polygon_shader->setVec3("material.diffuse", cubeMat2.diffuse);
-		polygon_shader->setVec3("material.specular", cubeMat2.specular);
-		polygon_shader->setFloat("material.shininess", cubeMat2.shininess);
-
-		//glBindVertexArray(VAO_polygon);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-
-		// 3
-		model = glm::mat4(1.0f);
-		model = glm::translate(model, cubeTrans3.position);
-		model = glm::rotate(model, glm::radians(cubeTrans3.rotation.x), glm::vec3(1.f, 0.f, 0.f));
-		model = glm::rotate(model, glm::radians(cubeTrans3.rotation.y), glm::vec3(0.f, 1.f, 0.f));
-		model = glm::rotate(model, glm::radians(cubeTrans3.rotation.z), glm::vec3(0.f, 0.f, 1.f));
-		model = glm::scale(model, cubeTrans3.scale);
-
-		polygon_shader->use();
-		polygon_shader->setMatrix4F("pv", pv);
-		polygon_shader->setMatrix4F("model", model);
-		polygon_shader->setBool("wireframeMode", wireframeMode);
-		polygon_shader->setVec3("viewPos", camera.Position);
-		polygon_shader->setVec3("light.position", light1.position);
-		polygon_shader->setVec3("light.ambient", light1.ambient);
-		polygon_shader->setVec3("light.diffuse", light1.diffuse);
-		polygon_shader->setVec3("light.specular", light1.specular);
-		polygon_shader->setVec3("material.ambient", cubeMat3.ambient);
-		polygon_shader->setVec3("material.diffuse", cubeMat3.diffuse);
-		polygon_shader->setVec3("material.specular", cubeMat3.specular);
-		polygon_shader->setFloat("material.shininess", cubeMat3.shininess);
-
-		glBindVertexArray(VAO_polygon);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-
+		
 		// LIGHT
 		model = glm::mat4(1.0f);
 		model = glm::translate(model, lightTrans.position);
