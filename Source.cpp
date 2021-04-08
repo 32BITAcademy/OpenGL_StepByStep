@@ -327,13 +327,6 @@ int main()
 		light1.position.z = 2.0f; // *sin(glfwGetTime() * 1.2f);
 		lightTrans.position = light1.position;
 
-		light1.specular.r = (sin(glfwGetTime() * 2) + 1);
-		light1.specular.g = (sin(glfwGetTime() * 2 + 2 * 3.14159 / 3) + 1);
-		light1.specular.b = (sin(glfwGetTime() * 2 + 4 * 3.14159 / 3) + 1);
-
-		light1.diffuse = light1.specular * 0.8f;
-		light1.ambient = light1.specular * 0.4f;
-
 		glClearColor(background.r, background.g, background.b, background.a);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 

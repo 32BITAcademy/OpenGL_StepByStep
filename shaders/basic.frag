@@ -39,9 +39,16 @@ void main()
     vec3 diffuse = light.diffuse * (diff_koef * material.diffuse);
 
     // specular
-    vec3 reflectDir = reflect(-lightDir, norm);
-    vec3 viewDir = normalize(FragPos-viewPos);
-    float spec_koef = pow(max(dot(viewDir, reflectDir), 0.0f), material.shininess);
+    vec3 lightpos = light.position;
+    float spec_koef = 0;
+    for(float i = -0.2; i<=0.2; i+=0.05)
+    {
+        lightpos.y = light.position.y + i;
+        vec3 slightDir = normalize(FragPos - lightpos);
+        vec3 reflectDir = reflect(-slightDir, norm);
+        vec3 viewDir = normalize(FragPos-viewPos);
+        spec_koef += pow(max(dot(viewDir, reflectDir), 0.0f), material.shininess*20.f);
+    }
     vec3 specular = light.specular * (spec_koef * material.specular);
 
     if (wireframeMode)
