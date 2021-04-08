@@ -31,6 +31,23 @@ struct Color {
 
 Color background = { 0.f, 0.f, 0.f, 1.f };
 
+struct Material
+{
+	glm::vec3 ambient;
+	glm::vec3 diffuse;
+	glm::vec3 specular;
+	float shininess;
+};
+
+struct Light
+{
+	glm::vec3 position;
+
+	glm::vec3 ambient;
+	glm::vec3 diffuse;
+	glm::vec3 specular;
+};
+
 Camera camera(glm::vec3(0.f, 0.f, -2.f));
 
 void OnResize(GLFWwindow* win, int width, int height)
@@ -197,21 +214,36 @@ int main()
 	-1.0f, 1.0f, 1.0f,	0.0f,  1.0f,  0.0f,		0.0f, 0.0f,		0.0f, 1.0f, 0.0f
 	};
 
-	ModelTransform polygonTrans1 = { glm::vec3(0.f, 0.f, 0.f),	// position
+	ModelTransform cubeTrans1 = { glm::vec3(0.f, 0.f, 0.f),	// position
 									glm::vec3(0.f, 0.f, 0.f),	// rotation
 									glm::vec3(1.f, 1.f, 1.f) };	// scale
 
-	ModelTransform polygonTrans2 = { glm::vec3(0.f, 0.f, 0.f),	// position
+	ModelTransform cubeTrans2 = { glm::vec3(0.f, 0.f, 0.f),	// position
 									glm::vec3(0.f, 0.f, 0.f),	// rotation
 									glm::vec3(1.f, 1.f, 1.f) };	// scale
 
-	ModelTransform polygonTrans3 = { glm::vec3(0.f, 0.f, 0.f),	// position
+	ModelTransform cubeTrans3 = { glm::vec3(0.f, 0.f, 0.f),	// position
 									glm::vec3(0.f, 0.f, 0.f),	// rotation
 									glm::vec3(1.f, 1.f, 1.f) };	// scale
 
 	ModelTransform lightTrans = {   glm::vec3(0.f, 0.f, 0.f),	// position
 									glm::vec3(0.f, 0.f, 0.f),	// rotation
 									glm::vec3(0.1f, 0.1f, 0.1f) };	// scale
+
+	Material cubeMat1 = {	glm::vec3(0.25, 0.20725, 0.20725),
+							glm::vec3(1, 0.829, 0.829),
+							glm::vec3(0.296648,	0.296648, 0.296648),
+							12.f }; // pearl
+
+	Material cubeMat2 = {	glm::vec3(0.25, 0.25, 0.25),
+							glm::vec3(0.4, 0.4, 0.4),
+							glm::vec3(0.774597,	0.774597, 0.774597),
+							77.f }; // chrome
+	
+	Material cubeMat3 = {	glm::vec3(0.1745, 0.01175, 0.01175),
+							glm::vec3(0.61424, 0.04136, 0.04136),
+							glm::vec3(0.727811, 0.626959, 0.626959),
+							77.f }; // ruby
 
 #pragma region BUFFERS INITIALIZATION
 	unsigned int box_texture;
@@ -262,10 +294,10 @@ int main()
 
 	double oldTime = glfwGetTime(), newTime, deltaTime;
 
-	glm::vec3 lightPos = glm::vec3(0.0f, 0.0f, 0.0f);
-	glm::vec3 lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
-	glm::vec3 ambientColor = glm::vec3(1.0f, 1.0f, 1.0f);
-
+	Light light1 = {	glm::vec3(0.0f, 0.0f, 0.0f),
+						glm::vec3(0.2f, 0.2f, 0.2f),
+						glm::vec3(0.5f, 0.5f, 0.5f),
+						glm::vec3(1.0f, 1.0f, 1.0f) };
 
 	while (!glfwWindowShouldClose(win))
 	{
@@ -275,27 +307,32 @@ int main()
 
 		processInput(win, deltaTime);
 
-		polygonTrans1.rotation.z = glfwGetTime() * 60.0;
-		//polygonTrans1.rotation.x = glfwGetTime() * 45.0;
-		polygonTrans1.position.x = 0.6f*cos(glfwGetTime()*0.5);
-		polygonTrans1.position.y = 0.6f*sin(glfwGetTime()*0.5);
-		polygonTrans1.setScale(0.2f);
+		cubeTrans1.rotation.z = glfwGetTime() * 60.0;
+		//cubeTrans1.rotation.x = glfwGetTime() * 45.0;
+		cubeTrans1.position.x = 0.6f;
+		cubeTrans1.setScale(0.2f);
 		
 		
-		polygonTrans2.rotation.z = glfwGetTime() * 30.0;
-		//polygonTrans2.rotation.y = glfwGetTime() * 45.0;
-		polygonTrans2.position.x = 0.6f * cos(glfwGetTime()*0.5 + 3.14158f);
-		polygonTrans2.position.y = 0.6f * sin(glfwGetTime()*0.5 + 3.14158f);
-		polygonTrans2.setScale(0.2f);
+		cubeTrans2.rotation.z = glfwGetTime() * 30.0;
+		//cubeTrans2.rotation.y = glfwGetTime() * 45.0;
+		cubeTrans2.position.x = -0.6f;
+		cubeTrans2.setScale(0.2f);
 
-		polygonTrans3.setScale(0.2f);
-		//polygonTrans3.rotation.x = glfwGetTime() * 90.0;
-		//polygonTrans3.rotation.y = glfwGetTime() * 60.0;
+		cubeTrans3.setScale(0.2f);
+		//cubeTrans3.rotation.x = glfwGetTime() * 90.0;
+		//cubeTrans3.rotation.y = glfwGetTime() * 60.0;
 
-		lightPos.x = 2.0f * cos(glfwGetTime() * 1.2f);
-		lightPos.y = 0.0f;
-		lightPos.z = 2.0f * sin(glfwGetTime() * 1.2f);
-		lightTrans.position = lightPos;
+		light1.position.x = 2.0f;// *cos(glfwGetTime() * 1.2f);
+		light1.position.y = 0.0f;
+		light1.position.z = 2.0f; // *sin(glfwGetTime() * 1.2f);
+		lightTrans.position = light1.position;
+
+		light1.specular.r = (sin(glfwGetTime() * 2) + 1);
+		light1.specular.g = (sin(glfwGetTime() * 2 + 2 * 3.14159 / 3) + 1);
+		light1.specular.b = (sin(glfwGetTime() * 2 + 4 * 3.14159 / 3) + 1);
+
+		light1.diffuse = light1.specular * 0.8f;
+		light1.ambient = light1.specular * 0.4f;
 
 		glClearColor(background.r, background.g, background.b, background.a);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -311,11 +348,11 @@ int main()
 		// 1
 		glm::mat4 model = glm::mat4(1.0f);
 
-		model = glm::translate(model, polygonTrans1.position);
-		model = glm::rotate(model, glm::radians(polygonTrans1.rotation.x), glm::vec3(1.f, 0.f, 0.f));
-		model = glm::rotate(model, glm::radians(polygonTrans1.rotation.y), glm::vec3(0.f, 1.f, 0.f));
-		model = glm::rotate(model, glm::radians(polygonTrans1.rotation.z), glm::vec3(0.f, 0.f, 1.f));
-		model = glm::scale(model, polygonTrans1.scale);
+		model = glm::translate(model, cubeTrans1.position);
+		model = glm::rotate(model, glm::radians(cubeTrans1.rotation.x), glm::vec3(1.f, 0.f, 0.f));
+		model = glm::rotate(model, glm::radians(cubeTrans1.rotation.y), glm::vec3(0.f, 1.f, 0.f));
+		model = glm::rotate(model, glm::radians(cubeTrans1.rotation.z), glm::vec3(0.f, 0.f, 1.f));
+		model = glm::scale(model, cubeTrans1.scale);
 
 
 		polygon_shader->use();
@@ -323,9 +360,14 @@ int main()
 		polygon_shader->setMatrix4F("model", model);
 		polygon_shader->setBool("wireframeMode", wireframeMode);
 		polygon_shader->setVec3("viewPos", camera.Position);
-		polygon_shader->setVec3("lightPos", lightPos);
-		polygon_shader->setVec3("lightColor", lightColor);
-		polygon_shader->setVec3("ambientColor", ambientColor);
+		polygon_shader->setVec3("light.position", light1.position);
+		polygon_shader->setVec3("light.ambient", light1.ambient);
+		polygon_shader->setVec3("light.diffuse", light1.diffuse);
+		polygon_shader->setVec3("light.specular", light1.specular);
+		polygon_shader->setVec3("material.ambient", cubeMat1.ambient);
+		polygon_shader->setVec3("material.diffuse", cubeMat1.diffuse);
+		polygon_shader->setVec3("material.specular", cubeMat1.specular);
+		polygon_shader->setFloat("material.shininess", cubeMat1.shininess);
 
 
 		glBindTexture(GL_TEXTURE_2D, box_texture);
@@ -335,45 +377,53 @@ int main()
 
 		// 2
 		model = glm::mat4(1.0f);
-		model = glm::translate(model, polygonTrans2.position);
-		model = glm::rotate(model, glm::radians(polygonTrans2.rotation.x), glm::vec3(1.f, 0.f, 0.f));
-		model = glm::rotate(model, glm::radians(polygonTrans2.rotation.y), glm::vec3(0.f, 1.f, 0.f));
-		model = glm::rotate(model, glm::radians(polygonTrans2.rotation.z), glm::vec3(0.f, 0.f, 1.f));
-		model = glm::scale(model, polygonTrans2.scale);
+		model = glm::translate(model, cubeTrans2.position);
+		model = glm::rotate(model, glm::radians(cubeTrans2.rotation.x), glm::vec3(1.f, 0.f, 0.f));
+		model = glm::rotate(model, glm::radians(cubeTrans2.rotation.y), glm::vec3(0.f, 1.f, 0.f));
+		model = glm::rotate(model, glm::radians(cubeTrans2.rotation.z), glm::vec3(0.f, 0.f, 1.f));
+		model = glm::scale(model, cubeTrans2.scale);
 
 		polygon_shader->use();
 		polygon_shader->setMatrix4F("pv", pv);
 		polygon_shader->setMatrix4F("model", model);
 		polygon_shader->setBool("wireframeMode", wireframeMode);
 		polygon_shader->setVec3("viewPos", camera.Position);
-		polygon_shader->setVec3("lightPos", lightPos);
-		polygon_shader->setVec3("lightColor", lightColor);
-		polygon_shader->setVec3("ambientColor", ambientColor);
+		polygon_shader->setVec3("light.position", light1.position);
+		polygon_shader->setVec3("light.ambient", light1.ambient);
+		polygon_shader->setVec3("light.diffuse", light1.diffuse);
+		polygon_shader->setVec3("light.specular", light1.specular);
+		polygon_shader->setVec3("material.ambient", cubeMat2.ambient);
+		polygon_shader->setVec3("material.diffuse", cubeMat2.diffuse);
+		polygon_shader->setVec3("material.specular", cubeMat2.specular);
+		polygon_shader->setFloat("material.shininess", cubeMat2.shininess);
 
 		//glBindVertexArray(VAO_polygon);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 
 		// 3
 		model = glm::mat4(1.0f);
-		model = glm::translate(model, polygonTrans3.position);
-		model = glm::rotate(model, glm::radians(polygonTrans3.rotation.x), glm::vec3(1.f, 0.f, 0.f));
-		model = glm::rotate(model, glm::radians(polygonTrans3.rotation.y), glm::vec3(0.f, 1.f, 0.f));
-		model = glm::rotate(model, glm::radians(polygonTrans3.rotation.z), glm::vec3(0.f, 0.f, 1.f));
-		model = glm::scale(model, polygonTrans3.scale);
+		model = glm::translate(model, cubeTrans3.position);
+		model = glm::rotate(model, glm::radians(cubeTrans3.rotation.x), glm::vec3(1.f, 0.f, 0.f));
+		model = glm::rotate(model, glm::radians(cubeTrans3.rotation.y), glm::vec3(0.f, 1.f, 0.f));
+		model = glm::rotate(model, glm::radians(cubeTrans3.rotation.z), glm::vec3(0.f, 0.f, 1.f));
+		model = glm::scale(model, cubeTrans3.scale);
 
 		polygon_shader->use();
 		polygon_shader->setMatrix4F("pv", pv);
 		polygon_shader->setMatrix4F("model", model);
 		polygon_shader->setBool("wireframeMode", wireframeMode);
 		polygon_shader->setVec3("viewPos", camera.Position);
-		polygon_shader->setVec3("lightPos", lightPos);
-		polygon_shader->setVec3("lightColor", lightColor);
-		polygon_shader->setVec3("ambientColor", ambientColor);
+		polygon_shader->setVec3("light.position", light1.position);
+		polygon_shader->setVec3("light.ambient", light1.ambient);
+		polygon_shader->setVec3("light.diffuse", light1.diffuse);
+		polygon_shader->setVec3("light.specular", light1.specular);
+		polygon_shader->setVec3("material.ambient", cubeMat3.ambient);
+		polygon_shader->setVec3("material.diffuse", cubeMat3.diffuse);
+		polygon_shader->setVec3("material.specular", cubeMat3.specular);
+		polygon_shader->setFloat("material.shininess", cubeMat3.shininess);
 
 		glBindVertexArray(VAO_polygon);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
-
-
 
 		// LIGHT
 		model = glm::mat4(1.0f);
@@ -383,7 +433,7 @@ int main()
 		light_shader->use();
 		light_shader->setMatrix4F("pv", pv);
 		light_shader->setMatrix4F("model", model);
-		light_shader->setVec3("lightColor", lightColor);
+		light_shader->setVec3("lightColor", light1.specular);
 
 		glBindVertexArray(VAO_polygon);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
