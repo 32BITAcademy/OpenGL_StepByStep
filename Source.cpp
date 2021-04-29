@@ -5,12 +5,15 @@
 #include <glm/gtc/type_ptr.hpp>
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
+#include <assimp/Importer.hpp>
 
+#include<filesystem>
 #include <iostream>
 #include <fstream>
 #include <string>
 #include "Shader.h"
 #include "Camera.h"
+#include "Model.h"
 
 struct ModelTransform
 {
@@ -320,6 +323,10 @@ int main()
 
 	Shader* polygon_shader = new Shader("shaders\\basic.vert", "shaders\\basic.frag");
 	Shader* light_shader = new Shader("shaders\\light.vert", "shaders\\light.frag");
+	Shader* backpack_shader = new Shader("shaders\\backpack.vert", "shaders\\backpack.frag");
+
+	Model backpack("models/backpack/backpack.obj");
+
 
 	double oldTime = glfwGetTime(), newTime, deltaTime;
 
@@ -443,18 +450,27 @@ int main()
 		}
 
 		
+		//// LIGHT
+		//model = glm::mat4(1.0f);
+		//model = glm::translate(model, lightTrans.position);
+		//model = glm::scale(model, lightTrans.scale);
+
+		//light_shader->use();
+		//light_shader->setMatrix4F("pv", pv);
+		//light_shader->setMatrix4F("model", model);
+		//light_shader->setVec3("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
+
+		//glBindVertexArray(VAO_polygon);
+		//glDrawArrays(GL_TRIANGLES, 0, 36);
+
+
 		// LIGHT
 		model = glm::mat4(1.0f);
-		model = glm::translate(model, lightTrans.position);
-		model = glm::scale(model, lightTrans.scale);
-
-		light_shader->use();
-		light_shader->setMatrix4F("pv", pv);
-		light_shader->setMatrix4F("model", model);
-		light_shader->setVec3("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
-
-		glBindVertexArray(VAO_polygon);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
+		model = glm::translate(model, glm::vec3(1.0f, 0.0f, 0.0f));
+		backpack_shader->use();
+		backpack_shader->setMatrix4F("pv", pv);
+		backpack_shader->setMatrix4F("model", model);
+		backpack.Draw(*backpack_shader);
 
 
 		glfwSwapBuffers(win);
