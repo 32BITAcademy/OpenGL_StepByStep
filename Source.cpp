@@ -427,7 +427,7 @@ int main()
 			}
 		}
 
-		for (int i = 0; i < cube_count; i++)
+		/*for (int i = 0; i < cube_count; i++)
 		{
 			model = glm::mat4(1.0f);
 
@@ -447,7 +447,7 @@ int main()
 			glBindTexture(GL_TEXTURE_2D, box_texture);
 			glBindVertexArray(VAO_polygon);
 			glDrawArrays(GL_TRIANGLES, 0, 36);
-		}
+		}*/
 
 		
 		//// LIGHT
@@ -466,7 +466,8 @@ int main()
 
 		// LIGHT
 		model = glm::mat4(1.0f);
-		model = glm::translate(model, glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(10.0f, 10.0f, 10.0f));
 		backpack_shader->use();
 		backpack_shader->setMatrix4F("pv", pv);
 		backpack_shader->setMatrix4F("model", model);
