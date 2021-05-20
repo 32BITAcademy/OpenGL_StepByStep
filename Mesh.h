@@ -39,7 +39,7 @@ public:
 
     Mesh(vector<Vertex> vertices, vector<unsigned int> indices, vector<Texture> textures);
 
-    void Draw(Shader& shader);
+    void Draw(Shader* shader);
 
 private:
     unsigned int VBO, EBO;

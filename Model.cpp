@@ -12,18 +12,18 @@
 #include <map>
 using namespace std;
 
-Model::Model(string const& path, bool gamma) : gammaCorrection(gamma)
+Model::Model(string const& path, bool invertedTexture, bool gamma) : gammaCorrection(gamma)
 {
-	loadModel(path);
+	loadModel(path, invertedTexture);
 }
 
-void Model::Draw(Shader& shader)
+void Model::Draw(Shader* shader)
 {
 	for (unsigned int i = 0; i < meshes.size(); i++)
 		meshes[i].Draw(shader);
 }
 
-void Model::loadModel(string const& path)
+void Model::loadModel(string const& path, bool invertedTexture)
 {
 	Assimp::Importer importer;
 	const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
@@ -34,24 +34,24 @@ void Model::loadModel(string const& path)
 	}
 	directory = path.substr(0, path.find_last_of('/'));
 
-	processNode(scene->mRootNode, scene);
+	processNode(scene->mRootNode, scene, invertedTexture);
 }
 
-void Model::processNode(aiNode* node, const aiScene* scene)
+void Model::processNode(aiNode* node, const aiScene* scene, bool invertedTexture)
 {
 	for (unsigned int i = 0; i < node->mNumMeshes; i++)
 	{
 		aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-		meshes.push_back(processMesh(mesh, scene));
+		meshes.push_back(processMesh(mesh, scene, invertedTexture));
 	}
 	for (unsigned int i = 0; i < node->mNumChildren; i++)
 	{
-		processNode(node->mChildren[i], scene);
+		processNode(node->mChildren[i], scene, invertedTexture);
 	}
 
 }
 
-Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
+Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene, bool invertedTexture)
 {
 	vector<Vertex> vertices;
 	vector<unsigned int> indices;
@@ -79,7 +79,10 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
 		{
 			glm::vec2 vec;
 			vec.x = mesh->mTextureCoords[0][i].x;
-			vec.y = mesh->mTextureCoords[0][i].y;
+			if (invertedTexture)
+				vec.y = 1.0-mesh->mTextureCoords[0][i].y;
+			else
+				vec.y = mesh->mTextureCoords[0][i].y;
 			vertex.TexCoords = vec;
 			// tangent
 			vector.x = mesh->mTangents[i].x;

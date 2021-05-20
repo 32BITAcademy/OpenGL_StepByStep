@@ -18,13 +18,13 @@ public:
     string directory;
     bool gammaCorrection;
 
-    Model(string const& path, bool gamma = false);
-    void Draw(Shader& shader);
+    Model(string const& path, bool invertedTexture = false, bool gamma = false);
+    void Draw(Shader* shader);
 
 private:
-    void loadModel(string const& path);
-    void processNode(aiNode* node, const aiScene* scene);
-    Mesh processMesh(aiMesh* mesh, const aiScene* scene);
+    void loadModel(string const& path, bool invertedTexture);
+    void processNode(aiNode* node, const aiScene* scene, bool invertedTexture);
+    Mesh processMesh(aiMesh* mesh, const aiScene* scene, bool invertedTexture);
     vector<Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, string typeName);
 };
 

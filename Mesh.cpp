@@ -18,7 +18,7 @@ Mesh::Mesh(vector<Vertex> vertices, vector<unsigned int> indices, vector<Texture
 	setupMesh();
 }
 
-void Mesh::Draw(Shader& shader)
+void Mesh::Draw(Shader* shader)
 {
 	unsigned int diffuseNr = 1;
 	unsigned int specularNr = 1;
@@ -38,7 +38,7 @@ void Mesh::Draw(Shader& shader)
 		else if (name == "texture_height")
 			number = std::to_string(heightNr++);
 
-		glUniform1i(glGetUniformLocation(shader.ID(), (name + number).c_str()), i);
+		glUniform1i(glGetUniformLocation(shader->ID(), (name + number).c_str()), i);
 		glBindTexture(GL_TEXTURE_2D, textures[i].id);
 	}
 
@@ -63,20 +63,20 @@ void Mesh::setupMesh()
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), &indices[0], GL_STATIC_DRAW);
 
 	// vertex positions
-	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
+	glEnableVertexAttribArray(0);
 	// vertex normals
-	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Normal));
+	glEnableVertexAttribArray(1);
 	// vertex texture coords
-	glEnableVertexAttribArray(2);
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, TexCoords));
+	glEnableVertexAttribArray(2);
 	// vertex tangent
-	glEnableVertexAttribArray(3);
 	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Tangent));
+	glEnableVertexAttribArray(3);
 	// vertex bitangent
-	glEnableVertexAttribArray(4);
 	glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Bitangent));
+	glEnableVertexAttribArray(4);
 
 	glBindVertexArray(0);
 }
