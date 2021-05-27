@@ -12,9 +12,9 @@
 #include <map>
 using namespace std;
 
-Model::Model(string const& path, bool invertedTexture, bool gamma) : gammaCorrection(gamma)
+Model::Model(string const& path, bool isUV_flipped, bool gamma) : gammaCorrection(gamma)
 {
-	loadModel(path, invertedTexture);
+	loadModel(path, isUV_flipped);
 }
 
 void Model::Draw(Shader* shader)
@@ -23,10 +23,14 @@ void Model::Draw(Shader* shader)
 		meshes[i].Draw(shader);
 }
 
-void Model::loadModel(string const& path, bool invertedTexture)
+void Model::loadModel(string const& path, bool isUV_flipped)
 {
 	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
+	const aiScene* scene;
+	if (isUV_flipped)
+		scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
+	else
+		scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace);
 	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 	{
 		cout << "ERROR::ASSIMP:: " << importer.GetErrorString() << endl;
@@ -34,24 +38,24 @@ void Model::loadModel(string const& path, bool invertedTexture)
 	}
 	directory = path.substr(0, path.find_last_of('/'));
 
-	processNode(scene->mRootNode, scene, invertedTexture);
+	processNode(scene->mRootNode, scene);
 }
 
-void Model::processNode(aiNode* node, const aiScene* scene, bool invertedTexture)
+void Model::processNode(aiNode* node, const aiScene* scene)
 {
 	for (unsigned int i = 0; i < node->mNumMeshes; i++)
 	{
 		aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-		meshes.push_back(processMesh(mesh, scene, invertedTexture));
+		meshes.push_back(processMesh(mesh, scene));
 	}
 	for (unsigned int i = 0; i < node->mNumChildren; i++)
 	{
-		processNode(node->mChildren[i], scene, invertedTexture);
+		processNode(node->mChildren[i], scene);
 	}
 
 }
 
-Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene, bool invertedTexture)
+Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
 {
 	vector<Vertex> vertices;
 	vector<unsigned int> indices;
@@ -79,10 +83,7 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene, bool invertedTexture
 		{
 			glm::vec2 vec;
 			vec.x = mesh->mTextureCoords[0][i].x;
-			if (invertedTexture)
-				vec.y = 1.0-mesh->mTextureCoords[0][i].y;
-			else
-				vec.y = mesh->mTextureCoords[0][i].y;
+			vec.y = mesh->mTextureCoords[0][i].y;
 			vertex.TexCoords = vec;
 			// tangent
 			vector.x = mesh->mTangents[i].x;

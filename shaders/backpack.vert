@@ -7,6 +7,7 @@ layout (location = 4) in vec3 inBiTangent;
 
 out vec2 texCoords;
 out vec3 vertNormal;
+out mat3 TBN;
 out vec3 FragPos;
 
 uniform mat4 pv;
@@ -19,4 +20,8 @@ void main()
 	texCoords = inTexCoords;
 	vertNormal = mat3(model)*inNormal;
 	FragPos = vertPos.xyz;
+	vec3 T = normalize((model*vec4(inTangent, 0.0f)).xyz);
+	vec3 B = normalize((model*vec4(inBiTangent, 0.0f)).xyz);
+	vec3 N = normalize((model*vec4(inNormal, 0.0f)).xyz);
+	TBN = mat3(T,B,N);
 }

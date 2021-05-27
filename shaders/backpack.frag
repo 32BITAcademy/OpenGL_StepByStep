@@ -20,6 +20,7 @@ in vec3 vertColor;
 in vec2 texCoords;
 in vec3 vertNormal;
 in vec3 FragPos;
+in mat3 TBN;
 
 out vec4 OutColor;
 
@@ -42,7 +43,10 @@ float getAtten(int i)
 
 vec3 CalcDiffusePlusSpecular(int i, vec3 lightDir)
 {
-    vec3 norm = normalize(vec3(texture(texture_normal1, texCoords)));
+    vec3 norm = texture(texture_normal1, texCoords).rgb;
+    norm = normalize(norm * 2.0f - 1.0f);
+    norm = normalize(TBN * norm);
+    //vec3 norm = normalize(vertNormal);
     float diff_koef = max(dot(norm, lightDir), 0.0);
     vec3 diffuse = light[i].diffuse * diff_koef * vec3(texture(texture_diffuse1, texCoords));
 
@@ -64,7 +68,7 @@ void main()
         {
             vec3 lightDir = -light[i].direction;
 
-            vec3 ambient = light[i].ambient * vec3(texture(texture_diffuse1, texCoords));
+            vec3 ambient = light[i].ambient * texture(texture_diffuse1, texCoords).rgb;
             vec3 diffspec = CalcDiffusePlusSpecular(i, lightDir);
 
             lresult = ambient + diffspec;

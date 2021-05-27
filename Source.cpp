@@ -3,11 +3,12 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 #include <assimp/Importer.hpp>
 
-#include<filesystem>
+#include <filesystem>
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -308,7 +309,8 @@ int main()
 	Shader* light_shader = new Shader("shaders\\light.vert", "shaders\\light.frag");
 	Shader* backpack_shader = new Shader("shaders\\backpack.vert", "shaders\\backpack.frag");
 
-	Model backpack("models/backpack/backpack.obj", true);
+	Model backpack("models/backpack/backpack.obj", false);
+	//Model chair("models/chair/chair.obj", false);
 
 	float max = 0;
 
@@ -467,13 +469,14 @@ int main()
 		backpack_shader->setVec3("viewPos", camera.Position);
 
 		active_lights = 0;
-		for (int i = 0; i < total_lights; i++)
+		for (int i = 0; i < lights.size(); i++)
 		{
 			active_lights += lights[i]->putInShader(backpack_shader, active_lights);
 		}
 		backpack_shader->setInt("lights_count", active_lights);
 
 		backpack.Draw(backpack_shader);
+		//chair.Draw(backpack_shader);
 
 		glfwSwapBuffers(win);
 		glfwPollEvents();
